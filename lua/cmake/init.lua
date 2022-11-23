@@ -188,11 +188,12 @@ function cmake.select_target()
     end
   end
 
-  vim.ui.select(display_targets, { prompt = 'Select target' }, function(_, idx)
+  vim.ui.select(targets, { prompt = 'Select target' }, function(item, idx)
     if not idx then
       return
     end
-    project_config.json.current_target = targets[idx]
+    -- project_config.json.current_target = targets[idx]
+    project_config.json.current_target = item
     project_config:write()
   end)
 end
@@ -252,6 +253,11 @@ function cmake.cancel()
   else
     vim.loop.kill(utils.last_job.pid, 9)
   end
+end
+
+function cmake.get_current_target_name()
+  local project_config = ProjectConfig.new()
+  return  project_config:get_current_target_name()
 end
 
 return cmake

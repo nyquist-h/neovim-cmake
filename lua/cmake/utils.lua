@@ -13,6 +13,11 @@ end
 
 local function append_to_quickfix(lines)
   vim.fn.setqflist({}, 'a', { lines = lines })
+
+  if (lines) then
+    vim.g.compilestatus=lines[1]
+  end
+
   -- Scrolls the quickfix buffer if not active
   if vim.bo.buftype ~= 'quickfix' then
     vim.api.nvim_command('cbottom')
@@ -166,7 +171,12 @@ function utils.run(cmd, args, opts)
     vim.api.nvim_command('silent! wall')
   end
 
-  vim.fn.setqflist({}, ' ', { title = cmd .. ' ' .. table.concat(args, ' ') })
+  vim.fn.setqflist({}, ' ',
+    {
+      title = cmd .. ' ' .. table.concat(args, ' '),
+      efm = vim.api.nvim_get_option("errorformat")
+    })
+  -- vim.fn.setqflist({}, ' ', { title = cmd .. ' ' .. table.concat(args, ' ') })
   opts.force_quickfix = vim.F.if_nil(opts.force_quickfix, not config.quickfix.only_on_error)
   if opts.force_quickfix then
     show_quickfix()
@@ -177,7 +187,13 @@ function utils.run(cmd, args, opts)
     args = args,
     cwd = opts.cwd,
     on_exit = vim.schedule_wrap(function(_, code, signal)
-      append_to_quickfix({ 'Exited with code ' .. (signal == 0 and code or 128 + signal) })
+      if code == 0 then
+        vim.g.compilestatus=""
+      else
+        vim.g.compilestatus=""
+      end
+
+      --append_to_quickfix({ 'Exited with code ' .. (signal == 0 and code or 128 + signal) })
       if code == 0 and signal == 0 then
         if config.copy_compile_commands and opts.copy_compile_commands_from then
           copy_compile_commands(opts.copy_compile_commands_from)

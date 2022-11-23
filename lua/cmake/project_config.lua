@@ -144,4 +144,13 @@ function ProjectConfig:validate_for_debugging()
   return true
 end
 
+function ProjectConfig:get_current_target_name()
+  if not self:get_build_dir():is_dir() then
+    return nil
+  else
+    return self.json.current_target
+  end
+end
+
+
 return ProjectConfig
